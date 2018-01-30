@@ -75,7 +75,7 @@ shinyServer(function(input, output, session){
                 options = list(
                   showScale = T,
                   highlightOnMouseOver = T,
-                  height = 350,
+                  height = 300,
                   maxDepth = 1,
                   maxPostDepth = 2,
                   minColor = 'red',
@@ -111,38 +111,55 @@ shinyServer(function(input, output, session){
   })
   
   output$fit_stock = renderPlot({
-    ggplot(data = fit_data(), aes(x = 1:nrow(fit_data()), y = Close)) +
-      geom_line() + xlab('Time Periods') + ggtitle(input$price1)
-  })
-  
-  output$diff = renderPlot({
-    ggplot() + geom_line(aes(x = 1:length(diff(ts(fit_data()), differences = input$diff)),
-                             y = diff(ts(fit_data()), differences = input$diff))) +
-      xlab('periods') + ylab('After Diff')
+    if (input$diff == 0) {
+      ggplot(data = fit_data(), aes(x = 1:nrow(fit_data()), y = Close)) +
+        geom_line() + xlab('Time Period') + 
+        ggtitle(input$price1) + theme_bw()
+    } else {
+      ggplot() + geom_line(aes(x = 1:length(diff(ts(fit_data()), differences = input$diff)),
+                               y = diff(ts(fit_data()), differences = input$diff))) +
+        xlab('Time Period') + ylab('After Diff') + 
+        ggtitle(input$price1) + theme_bw()
+    }
   })
   
   output$acf = renderPlot({
-    Acf(diff(ts(fit_data()), differences = input$diff), main = '')
+    if (input$diff == 0) {
+      Acf(fit_data()[1:200,], main = '')}
+    else {
+      Acf(diff(ts(fit_data()), differences = input$diff), main = '')
+    }
   })
   
   output$pacf = renderPlot({
-    Pacf(diff(ts(fit_data()), differences = input$diff), main = '')
+    if (input$diff == 0) {
+      pacf(fit_data()[1:200,], main = '')}
+    else {
+      pacf(diff(ts(fit_data()), differences = input$diff), main = '')
+    }
   })
   
   output$resid = renderPlot({
-    ggplot() + geom_line(aes(x = 1:200, y = residuals(fit_model()))) +
-      ylab('Residuals') + xlab('periods')
+    ggplot() + geom_point(aes(x = 1:200, 
+                              y = residuals(fit_model())), alpha = 0.7) +
+      geom_smooth(aes(x = 1:200, y = residuals(fit_model()))) +
+      ylab('Residuals') + xlab('period')
   })
   
   output$resid_dis = renderPlot({
     ggplot(data = data.frame(res = residuals(fit_model())), aes(x = res)) + 
       geom_histogram(aes(y = ..density..), 
-                     bins = input$resid_hist, col = 'red', alpha = 0.5) + 
-      geom_density(aes(y = ..density..), col = 'yellow')
+                     bins = input$resid_hist, 
+                     col = 'red', alpha = 0.5, fill = 'red') + 
+      geom_density(aes(y = ..density..), col = 'blue')
   })
   
   output$lbt = renderPrint({
     checkresiduals(fit_model(), plot = F)
+  })
+  
+  output$spt = renderPrint({
+    shapiro.test(residuals(fit_model()))
   })
   
   output$fore = renderPlot({
@@ -159,8 +176,9 @@ shinyServer(function(input, output, session){
     ggplot() +
       geom_line(aes(x = 1:200, y = fit_data()[1:200,])) +
       geom_line(aes(x = 1:length(fitted(fit_model())),
-                    y = fitted(fit_model())),
-                col = 'red',
-                inherit.aes = F)
+                    y = fitted(fit_model())), col = 'red',
+                inherit.aes = F) +
+      ggtitle(input$price1) + xlab('Time Period') + ylab('Price') +
+      theme_bw()
   })
 })

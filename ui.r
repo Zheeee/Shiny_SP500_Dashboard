@@ -1,7 +1,8 @@
 shinyUI(dashboardPage (
-  dashboardHeader(title = 'S&P 500 stocks'),
+  dashboardHeader(title = 'S&P 500 Dashboard'),
   dashboardSidebar(
-    sidebarUserPanel('ZheYang'),
+    sidebarUserPanel('ZheYang',
+                     image = 'https://avatars3.githubusercontent.com/u/32778947?s=40&v=4'),
     sidebarMenu(
       menuItem('Data', tabName = 'dt', icon = icon('database')),
       menuItem('Treemap', tabName = 'tm', icon = icon('map')),
@@ -32,12 +33,13 @@ shinyUI(dashboardPage (
       tabItem(tabName = 'tm',
               fluidRow(
                 box(title = 'TreeMap',status = 'info',solidHeader = T,
-                    h4('Treemap to visulization the return and volume of Sector'),
+                    h4(tags$b('Treemap to visulization the return and volume of Sector')),
+                    'In this plot: red color means lost, green color means profit.',
                     htmlOutput('tree')),
                 tabBox(title = tagList(shiny::icon("bar-chart"), "Indicators"), width = 4,
-                    tabPanel('Indicators',
+                    tabPanel('Indicators', 'Compare different indicators in the same sector.',
                              plotlyOutput('bar')),
-                    tabPanel('Correlation',
+                    tabPanel('Correlation', 'Correlation in the same sector',
                              plotlyOutput('corr'))),
                 box(title = 'Stock Price Input',status = 'danger',solidHeader = T,
                     width = 2,
@@ -60,7 +62,7 @@ shinyUI(dashboardPage (
                    sliderInput('ar', 'Autoregression',
                                min = 0, max = 3, value = 0),
                    sliderInput('diff', 'Differencing',
-                               min = 1 , max = 3, value = 1),
+                               min = 0 , max = 3, value = 0),
                    sliderInput('ma', 'Moving-average',
                                min = 0 , max = 3, value = 0)),
                tabBox(title = tagList(shiny::icon("line-chart"), "Time Series"), width = 9,
@@ -68,12 +70,12 @@ shinyUI(dashboardPage (
                                plotOutput('fit_stock')),
                       tabPanel('Model',
                                fluidRow(
-                                 box('ACF', solidHeader = T, status = 'success',
+                                 box(h4(tags$b('ACF')), solidHeader = T, status = 'success',
+                                     'Auto correlation between time series and its own lag',
                                      plotOutput('acf')),
-                                 box('PACF', solidHeader = T, status = 'success',
-                                     plotOutput('pacf')),
-                                 box('DIFF', width = 9,
-                                     plotOutput('diff'))
+                                 box(h4(tags$b('PACF')), solidHeader = T, status = 'success',
+                                     'Conditional auto correlation between time seires and its own lag',
+                                     plotOutput('pacf'))
                                )),
                       tabPanel('Result',
                                fluidRow(
@@ -81,17 +83,21 @@ shinyUI(dashboardPage (
                                      plotOutput('resid')),
                                  box('Residuals Distribution',
                                      plotOutput('resid_dis')),
-                                 box('Ljung-Box test',
-                                     textOutput('lbt')),
+                                 tabBox(title = tagList(shiny::icon("info"), "Test Result"),
+                                   tabPanel('Ljung-Box Test',
+                                            textOutput('lbt')),
+                                   tabPanel('Shapiro Test',
+                                            textOutput('spt'))
+                                     ),
                                  box('Hist Bins input:',
                                      sliderInput('resid_hist', 'Bins',
                                                  min = 20, max = 60, value = 30))
                                )),
                       tabPanel('Forecast',
                                fluidRow(
-                                 box('Forcast',
+                                 box('Forecast',
                                      plotOutput('fore')),
-                                 box('Fitted Vs Data',
+                                 box('Plot fitted data with price',
                                      plotOutput('f_v_d')),
                                  box('Accuracy',
                                      tableOutput('accu'))

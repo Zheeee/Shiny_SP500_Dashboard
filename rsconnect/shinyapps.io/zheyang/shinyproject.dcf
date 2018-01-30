@@ -5,8 +5,8 @@ account: zheyang
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 265765
-bundleId: 1198323
+bundleId: 1198717
 url: https://zheyang.shinyapps.io/ShinyProject/
-when: 1517261210.59003
+when: 1517285647.6165
 asMultiple: FALSE
 asStatic: FALSE
