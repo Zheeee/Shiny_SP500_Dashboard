@@ -11,6 +11,40 @@ shinyServer(function(input, output, session){
       selected = st[1])
   })
   
+  tree_sec = reactive({
+    sector_data %>% 
+      mutate(., day_ret = (close - open) / open * 100) %>% 
+      select(., Name = name, Date = timestamp, Volume = volume, day_ret) %>% 
+      filter(., is.null(day_ret) == F) %>% 
+      mutate(., Sector = 'S&P500') %>% 
+      filter(., as.character(Date) == as.character(input$date)) %>% 
+      mutate(., Parent_f = factor(Sector), Name_f = factor(Name)) %>% 
+      select(., Name_f, Parent_f, Volume, day_ret, -c(Name, Sector)) %>% 
+      rename(., Name = Name_f, Parent = Parent_f)
+  })
+  
+  tree_stock = reactive({
+     stocks_w_sec %>% 
+       arrange(., desc(Date)) %>% 
+       mutate(., day_ret = (Close - Open) / Open * 100) %>% 
+       select(., Name, Sector, Volume, day_ret, Date) %>% 
+       filter(., is.null(day_ret) == F) %>% 
+       na.omit(.) %>% 
+       filter(., as.character(Date) == as.character(input$date)) %>% 
+       select(., -Date) %>% 
+       rbind(., df_add) %>% 
+       rename(., Parent = Sector) %>% 
+       arrange(., Parent) %>% 
+       mutate(., Parent_f = factor(Parent), Name_f = factor(Name)) %>% 
+       select(., Name_f, Parent_f, Volume, day_ret, -c(Name, Parent)) %>% 
+       rename(., Name = Name_f, Parent = Parent_f)
+  })
+  
+  ret_day = reactive({
+    rbind(tree_sec(), tree_stock()) %>% 
+      arrange(., Parent)
+  })
+  
   indict_selected = reactive({
     indict_w_sec %>%
       filter(., Sector == input$sector) %>% 
@@ -69,7 +103,7 @@ shinyServer(function(input, output, session){
   })
   
   output$tree = renderGvis({
-    gvisTreeMap(ret_day,
+    gvisTreeMap(ret_day(),
                 idvar = 'Name', parentvar = 'Parent', 
                 sizevar = 'Volume', colorvar = 'day_ret',
                 options = list(

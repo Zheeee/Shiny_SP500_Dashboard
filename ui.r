@@ -8,6 +8,9 @@ shinyUI(dashboardPage (
       menuItem('Treemap', tabName = 'tm', icon = icon('map')),
       menuItem('TimeSeries', tabName = 'ts', icon = icon('line-chart'))
     ),
+    dateInput('date', h3('Select Date'), 
+              min = '2016-08-12', max = '2017-08-11',
+              value = '2017-08-11'),
     selectizeInput('sector', h3('Sectors'), 
                    choices = na.omit(unique(stocks_w_sec$Sector)),
                    selected = 'XLI'),
@@ -36,7 +39,8 @@ shinyUI(dashboardPage (
                     h4(tags$b('Treemap to visulization the return and volume of Sector')),
                     'In this plot: red color means lost, green color means profit.',
                     htmlOutput('tree')),
-                tabBox(title = tagList(shiny::icon("bar-chart"), "Indicators"), width = 4,
+                tabBox(title = tagList(shiny::icon("bar-chart"), "Indicators"), 
+                       width = 4,
                     tabPanel('Indicators', 'Compare different indicators in the same sector.',
                              plotlyOutput('bar')),
                     tabPanel('Correlation', 'Correlation in the same sector',
@@ -51,7 +55,7 @@ shinyUI(dashboardPage (
                 box(title = 'Stock Price Movement',status = 'success',solidHeader = T,
                     width = 6,
                     dygraphOutput('price')),
-                box(title = 'S&P500 Price Movement',status = 'success',solidHeader = T,
+                box(title = 'Stock Price Movement',status = 'success',solidHeader = T,
                     width = 6,
                     dygraphOutput('spy'))
                 )),
