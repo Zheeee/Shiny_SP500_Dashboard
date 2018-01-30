@@ -1,0 +1,12 @@
+name: ShinyProject
+title: ShinyProject
+username:
+account: zheyang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 265765
+bundleId: 1198323
+url: https://zheyang.shinyapps.io/ShinyProject/
+when: 1517261210.59003
+asMultiple: FALSE
+asStatic: FALSE
