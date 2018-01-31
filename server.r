@@ -11,6 +11,23 @@ shinyServer(function(input, output, session){
       selected = st[1])
   })
   
+  d = reactive({
+    url = input$url
+    webpage = read_html(url)
+    boxx = html_node(webpage, '#articleText')
+    boxx_text = html_text(boxx)
+    test = trimws(boxx_text)
+    myCorpus = Corpus(VectorSource(test))
+    myCorpus = tm_map(myCorpus, content_transformer(tolower))
+    myCorpus = tm_map(myCorpus, removePunctuation)
+    myCorpus = tm_map(myCorpus, removeNumbers)
+    myCorpus = tm_map(myCorpus, removeWords, stopwords("english"))
+    dtm <- TermDocumentMatrix(myCorpus)
+    m <- as.matrix(dtm)
+    v <- sort(rowSums(m),decreasing=TRUE)
+    d <- data.frame(word = names(v),freq=v)
+  })
+  
   tree_sec = reactive({
     sector_data %>% 
       mutate(., day_ret = (close - open) / open * 100) %>% 
@@ -102,6 +119,12 @@ shinyServer(function(input, output, session){
       Arima(., order = c(input$ar, input$diff, input$ma))
   })
   
+  output$word = renderPlot({
+    wordcloud(words = d()$word, freq = d()$freq, scale = c(4, 0.5), random.order = F,
+              min.freq = 1, max.words=300, colors=brewer.pal(8, "Dark2"),
+              rot.per = 0.5)
+  })
+  
   output$tree = renderGvis({
     gvisTreeMap(ret_day(),
                 idvar = 'Name', parentvar = 'Parent', 
@@ -141,7 +164,7 @@ shinyServer(function(input, output, session){
   
   output$corr = renderPlotly({
       plot_ly(x = rownames(cor_selected()), y = colnames(cor_selected()),
-              z = cor_selected(), type = 'heatmap')
+              z = cor_selected(), type = 'heatmap') 
   })
   
   output$fit_stock = renderPlot({
@@ -199,6 +222,34 @@ shinyServer(function(input, output, session){
   output$fore = renderPlot({
     plot(forecast(fit_model(), h = 50))
     lines(fit_data()[1:250,])
+    abline(h = forecast(fit_model(), h = 50)[[6]][50,1], lty = 'dashed', col = 'red') + 
+      text(x = 200, 
+           y = forecast(fit_model(), h = 50)[[6]][50,1] - 1, 
+           labels = round(forecast(fit_model(), h = 50)[[6]][50,1], 2), cex = 0.8) + 
+      text(x = 175, 
+           y = forecast(fit_model(), h = 50)[[6]][50,1] - 1, 
+           labels = '80%:', cex = 0.8)
+    abline(h = forecast(fit_model(), h = 50)[[6]][50,2], lty = 'dotdash', col = 'blue') +
+      text(x = 200,
+           y = forecast(fit_model(), h = 50)[[6]][50,2] - 1,
+           labels = round(forecast(fit_model(), h = 50)[[6]][50,2], 2), cex = 0.8) +
+      text(x = 175,
+           y = forecast(fit_model(), h = 50)[[6]][50,2] - 1,
+           labels = '95%:', cex = 0.8)
+    abline(h = forecast(fit_model(), h = 50)[[5]][50,1], lty = 'dashed', col = 'red') + 
+      text(x = 200, 
+           y = forecast(fit_model(), h = 50)[[5]][50,1] + 1, 
+           labels = round(forecast(fit_model(), h = 50)[[5]][50,1], 2), cex = 0.8) + 
+      text(x = 175, 
+           y = forecast(fit_model(), h = 50)[[5]][50,1] + 1, 
+           labels = '80%:', cex = 0.8)
+    abline(h = forecast(fit_model(), h = 50)[[5]][50,2], lty = 'dotdash', col = 'blue') +
+      text(x = 200,
+           y = forecast(fit_model(), h = 50)[[5]][50,2] + 1,
+           labels = round(forecast(fit_model(), h = 50)[[5]][50,2], 2), cex = 0.8) +
+      text(x = 175,
+           y = forecast(fit_model(), h = 50)[[5]][50,2] + 1,
+           labels = '95%:', cex = 0.8)
 
   })
   

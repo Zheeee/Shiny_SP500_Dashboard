@@ -4,6 +4,7 @@ shinyUI(dashboardPage (
     sidebarUserPanel('ZheYang',
                      image = 'https://avatars3.githubusercontent.com/u/32778947?s=40&v=4'),
     sidebarMenu(
+      menuItem('WordCloud', tabName = 'cv', icon = icon('commenting')),
       menuItem('Data', tabName = 'dt', icon = icon('database')),
       menuItem('Treemap', tabName = 'tm', icon = icon('map')),
       menuItem('TimeSeries', tabName = 'ts', icon = icon('line-chart'))
@@ -24,12 +25,19 @@ shinyUI(dashboardPage (
                    selected = 'Price.Earnings')),
   dashboardBody(
     tabItems(
+      tabItem(tabName = 'cv',
+              fluidRow(box(width = 4,
+                        textInput('url', 'Please input URL on Nasdaq: ', 
+                                     value = 'http://www.nasdaq.com/article/stock-market-news-for-august-11-2017-cm830924')),
+                       box(solidHeader = T, status = 'danger',
+                           plotOutput('word', width = '100%', height = '800px')))
+              ),
       tabItem(tabName = 'dt',
               fluidRow(box(DT::dataTableOutput('table'),
                            'Time series data of S&P 500 companies',br(),
                            'Other data including:',br(),
                            'Indicator of S&P500 companies',br(),
-                           'Time series data pf Sector ETF price',
+                           'Time series data of Sector ETF price',
                            width = 12, solidHeader = T,
                            status = 'warning'))
               ),

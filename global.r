@@ -14,6 +14,9 @@ library(plotly)
 library(tidyr)
 library(rsconnect)
 library(dygraphs)
+library(tm)
+library(SnowballC)
+library(wordcloud)
 
 # Load stock, sector information and indicators
 cf = read.csv('./data/con_f.csv', stringsAsFactors = F)
@@ -21,29 +24,31 @@ con_cf = read.csv('./data/con.csv', stringsAsFactors = F)
 stocks = read.csv('./data/all_stocks_1yr.csv', stringsAsFactors = F)
 
 # Load sector data
-a = "XLY,XLP,XLE,XLF,XLV,XLI,XLB,XLRE,XLK,XLU,VOX"
-b = strsplit(a, split = ',')[[1]]
-
-av_api = function(symble, itv = 'TIME_SERIES_DAILY', opz = 'compact') {
-  http = 'https://www.alphavantage.co/query?function='
-  b = '&symbol='
-  c = '&outputsize='
-  d = '&apikey=RJZ9H4BTXR3YW06Q&datatype=csv'
-  api = paste0(c(http, itv, b, symble, c, opz, d), collapse = '')
-  av = read.csv(api)
-  return(av)
-}
-
-sector_list = lapply(b, function(x) av_api(x, opz = 'full'))
-sec_row_num = sapply(sector_list, nrow)
-sector_name = rep(b, sec_row_num)
-sector_data = do.call(rbind, sector_list)
-sector_data$name = sector_name
+# a = "XLY,XLP,XLE,XLF,XLV,XLI,XLB,XLRE,XLK,XLU,VOX"
+# b = strsplit(a, split = ',')[[1]]
+# 
+# av_api = function(symble, itv = 'TIME_SERIES_DAILY', opz = 'compact') {
+#   http = 'https://www.alphavantage.co/query?function='
+#   b = '&symbol='
+#   c = '&outputsize='
+#   d = '&apikey=RJZ9H4BTXR3YW06Q&datatype=csv'
+#   api = paste0(c(http, itv, b, symble, c, opz, d), collapse = '')
+#   av = read.csv(api)
+#   return(av)
+# }
+# 
+# sector_list = lapply(b, function(x) av_api(x, opz = 'full'))
+# sec_row_num = sapply(sector_list, nrow)
+# sector_name = rep(b, sec_row_num)
+# sector_data = do.call(rbind, sector_list)
+# sector_data$name = sector_name
 spy_temp = read.csv('./data/SPY.csv', stringsAsFactors = F)
-spy = spy_temp %>% 
+spy = spy_temp %>%
   select(., -(Adj.Close))
 spy$Name = rep('SPY', nrow(spy))
-write.csv(sector_data, file = './data/sector_data.csv',row.names = F)
+# write.csv(sector_data, file = './data/sector_data.csv',row.names = F)
+
+sector_data = read.csv('./data/sector_data.csv')
 
 # Make stocks with Sector
 temp = con_cf %>% 
@@ -99,30 +104,3 @@ write.csv(indict_w_sec, file = './data/indict_w_sec.csv',row.names = F)
 
 df_add = data.frame(Name = c('S&P500'), Sector = c(NA),
                     Volume = c(71955600), day_ret = c(0.66))
-# get the return of stock for the treemap
-# ret_stock = stocks_w_sec %>%
-#   arrange(., desc(Date)) %>%
-#   mutate(., day_ret = (Close - Open) / Open * 100) %>%
-#   select(., Name, Sector, Volume, day_ret, Date) %>%
-#   filter(., is.null(day_ret) == F) %>%
-#   filter(., Date == '2017-08-11') %>%
-#   na.omit(.) %>%
-#   select(., Name, Sector, Volume, day_ret)
-# 
-# ret_sec = sector_data %>%
-#   mutate(., day_ret = (close - open) / open * 100) %>%
-#   select(., Name = name, Date = timestamp, Volume = volume, day_ret) %>%
-#   filter(., is.null(day_ret) == F) %>%
-#   group_by(., Name) %>%
-#   top_n(., 1, wt = Date) %>%
-#   mutate(., Sector = 'S&P500') %>%
-#   select(., Name, Sector, Volume, day_ret)
-# 
-# ret_sec_stock = rbind.data.frame(ret_stock, ret_sec)
-# rownames(ret_sec_stock) = 1:nrow(ret_sec_stock)
-# 
-# ret_day = rbind(ret_sec_stock, df_add) %>%
-#   rename(., Parent = Sector) %>%
-#   arrange(., Parent)
-# ret_day$Name = as.factor(ret_day$Name)
-# ret_day$Parent = as.factor(ret_day$Parent)
