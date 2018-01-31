@@ -15,14 +15,14 @@ shinyUI(dashboardPage (
     selectizeInput('sector', h3('Sectors'), 
                    choices = na.omit(unique(stocks_w_sec$Sector)),
                    selected = 'XLI'),
+    selectizeInput('indict', h3('Indicator'), 
+                   choices = colnames(indict_w_sec)[3:10],
+                   selected = 'Price.Earnings'),
     selectizeInput('price1', h3('Price1'), 
                    choices = unique(stocks_w_spy$Name),
                    selected = 'MMM'),
     textInput('price2', h3('Price2'),
-                   value = 'SPY'),
-    selectizeInput('indict', h3('Indicator'), 
-                   choices = colnames(indict_w_sec)[3:10],
-                   selected = 'Price.Earnings')),
+                   value = 'SPY')),
   dashboardBody(
     tabItems(
       tabItem(tabName = 'cv',
