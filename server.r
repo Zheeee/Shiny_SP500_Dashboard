@@ -85,8 +85,8 @@ shinyServer(function(input, output, session){
       filter(., Name == input$price1) %>% 
       select(., Date, Open, High, Low, Close) %>%
       na.omit(.) %>% 
-      mutate(., SMA = SMA(Close, n = input$sma)) %>% 
-      mutate(., EMA = EMA(Close, n = input$ema)) %>% 
+      mutate(., SMA1 = SMA(Close, n = input$sma1)) %>% 
+      mutate(., SMA2 = SMA(Close, n = input$sma2)) %>% 
       column_to_rownames(.)
   })
   
@@ -95,8 +95,8 @@ shinyServer(function(input, output, session){
       filter(., Name == input$price2) %>% 
       select(., Date, Open, High, Low, Close) %>%
       na.omit(.) %>% 
-      mutate(., SMA = SMA(Close, n = input$sma)) %>% 
-      mutate(., EMA = EMA(Close, n = input$ema)) %>% 
+      mutate(., SMA1 = SMA(Close, n = input$sma1)) %>% 
+      mutate(., SMA2 = SMA(Close, n = input$sma2)) %>% 
       column_to_rownames(.)
   })
   

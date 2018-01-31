@@ -17,6 +17,7 @@ library(dygraphs)
 library(tm)
 library(SnowballC)
 library(wordcloud)
+library(rvest)
 
 # Load stock, sector information and indicators
 cf = read.csv('./data/con_f.csv', stringsAsFactors = F)
