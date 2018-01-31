@@ -4,8 +4,8 @@ shinyUI(dashboardPage (
     sidebarUserPanel('ZheYang',
                      image = 'https://avatars3.githubusercontent.com/u/32778947?s=40&v=4'),
     sidebarMenu(
-      menuItem('WordCloud', tabName = 'cv', icon = icon('commenting')),
       menuItem('Data', tabName = 'dt', icon = icon('database')),
+      menuItem('WordCloud', tabName = 'cv', icon = icon('commenting')),
       menuItem('Treemap', tabName = 'tm', icon = icon('map')),
       menuItem('TimeSeries', tabName = 'ts', icon = icon('line-chart'))
     ),
@@ -29,8 +29,8 @@ shinyUI(dashboardPage (
               fluidRow(box(width = 4,
                         textInput('url', 'Please input URL on Nasdaq: ', 
                                      value = 'http://www.nasdaq.com/article/stock-market-news-for-august-11-2017-cm830924')),
-                       box(solidHeader = T, status = 'danger',
-                           plotOutput('word', width = '100%', height = '800px')))
+                       box(solidHeader = T, status = 'danger',width = 7,
+                           plotOutput('word', width = '800px', height = '800px')))
               ),
       tabItem(tabName = 'dt',
               fluidRow(box(DT::dataTableOutput('table'),
@@ -45,7 +45,7 @@ shinyUI(dashboardPage (
               fluidRow(
                 box(title = 'TreeMap',status = 'info',solidHeader = T,
                     h4(tags$b('Treemap to visulization the return and volume of Sector')),
-                    'In this plot: red color means lost, green color means profit.',
+                    'In this plot: red means lost, green means profit.',
                     htmlOutput('tree')),
                 tabBox(title = tagList(shiny::icon("bar-chart"), "Indicators"), 
                        width = 4,
@@ -80,7 +80,7 @@ shinyUI(dashboardPage (
                tabBox(title = tagList(shiny::icon("line-chart"), "Time Series"), width = 9,
                       tabPanel('Price',
                                plotOutput('fit_stock')),
-                      tabPanel('Model',
+                      tabPanel('Correlation',
                                fluidRow(
                                  box(h4(tags$b('ACF')), solidHeader = T, status = 'success',
                                      'Auto correlation between time series and its own lag',

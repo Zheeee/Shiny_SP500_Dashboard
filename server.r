@@ -21,7 +21,7 @@ shinyServer(function(input, output, session){
     myCorpus = tm_map(myCorpus, content_transformer(tolower))
     myCorpus = tm_map(myCorpus, removePunctuation)
     myCorpus = tm_map(myCorpus, removeNumbers)
-    myCorpus = tm_map(myCorpus, removeWords, stopwords("english"))
+    myCorpus = tm_map(myCorpus, removeWords, c(stopwords("english"), 'free', 'report', 'stock'))
     dtm <- TermDocumentMatrix(myCorpus)
     m <- as.matrix(dtm)
     v <- sort(rowSums(m),decreasing=TRUE)
@@ -91,13 +91,23 @@ shinyServer(function(input, output, session){
   })
   
   stock_selected2 = reactive({
-    stocks_w_spy %>% 
-      filter(., Name == input$price2) %>% 
-      select(., Date, Open, High, Low, Close) %>%
-      na.omit(.) %>% 
-      mutate(., SMA1 = SMA(Close, n = input$sma1)) %>% 
-      mutate(., SMA2 = SMA(Close, n = input$sma2)) %>% 
-      column_to_rownames(.)
+    if (input$price2 != '') {
+      stocks_w_spy %>% 
+        filter(., Name == input$price2) %>% 
+        select(., Date, Open, High, Low, Close) %>%
+        na.omit(.) %>% 
+        mutate(., SMA1 = SMA(Close, n = input$sma1)) %>% 
+        mutate(., SMA2 = SMA(Close, n = input$sma2)) %>% 
+        column_to_rownames(.)
+    } else {
+      stocks_w_spy %>% 
+        filter(., Name == "SPY") %>% 
+        select(., Date, Open, High, Low, Close) %>%
+        na.omit(.) %>% 
+        mutate(., SMA1 = SMA(Close, n = input$sma1)) %>% 
+        mutate(., SMA2 = SMA(Close, n = input$sma2)) %>% 
+        column_to_rownames(.)
+    }
   })
   
   fit_data = reactive({
@@ -148,10 +158,17 @@ shinyServer(function(input, output, session){
   })
   
   output$spy = renderDygraph({
-    dygraph(stock_selected2(), main = input$price2, group = 'my_stocks') %>% 
-      dyCandlestick() %>% 
-      dyLegend(show = 'always', hideOnMouseOut = T) %>% 
-      dyRangeSelector(retainDateWindow = T)
+    if (input$price2 != '') {
+      dygraph(stock_selected2(), main = input$price2, group = 'my_stocks') %>% 
+        dyCandlestick() %>% 
+        dyLegend(show = 'always', hideOnMouseOut = T) %>% 
+        dyRangeSelector(retainDateWindow = T)
+    } else {
+      dygraph(stock_selected2(), main = 'SPY', group = 'my_stocks') %>% 
+        dyCandlestick() %>% 
+        dyLegend(show = 'always', hideOnMouseOut = T) %>% 
+        dyRangeSelector(retainDateWindow = T)
+    }
   })
   
   output$bar = renderPlotly({
